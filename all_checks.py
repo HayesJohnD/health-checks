@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
+"""
+A set of system checks for making sure your computer has no issues.
+
+Returns:
+    str: Everything ok: if there are no errors, sys.ext(1) otherwise
+"""
 import os
 import shutil
 import sys
 
 
-def check_reboot():
+def check_reboot() -> bool:
     """Return True if the computer has a pending reboot."""
     return os.path.exists("/run/reboot-required")
 
 
-def check_disk_full(disk, min_gb, min_percent):
+def check_disk_full(disk: str, min_gb: int, min_percent: int) -> bool:
     """Return True if there is enough free disk space, false otherwise."""
     du = shutil.disk_usage(disk)
     # calculate the percentage of free space
@@ -21,23 +27,24 @@ def check_disk_full(disk, min_gb, min_percent):
     return False
 
 
-def check_root_full():
-    """Returns True if the root partition is full, False otherwise."""
+def check_root_full() -> bool:
+    """Return True if the root partition is full, False otherwise."""
     return check_disk_full(disk="/", min_gb=2, min_percent=10)
 
 
-def main():
+def main() -> None:
     """Main function from which all function calls are made."""
     checks = [
         (check_reboot, "Pending Reboot"),
         (check_root_full, "Root partition full"),
     ]
-
+    everything_ok = True
     for check, msg in checks:
         if check():
             print(msg)
-            sys.exit(1)
-
+            everything_ok = False
+    if not everything_ok:
+        sys.exit(1)
     print("Everything ok.")
     sys.exit(0)
 
