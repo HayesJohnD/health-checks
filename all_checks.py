@@ -5,12 +5,12 @@ import sys
 
 
 def check_reboot():
-    """Returns True if the computer has a pending reboot."""
+    """Return True if the computer has a pending reboot."""
     return os.path.exists("/run/reboot-required")
 
 
 def check_disk_full(disk, min_gb, min_percent):
-    """Returns True if there is enough free disk space, false otherwise."""
+    """Return True if there is enough free disk space, false otherwise."""
     du = shutil.disk_usage(disk)
     # calculate the percentage of free space
     percent_free = 100 * du.free / du.total
@@ -27,13 +27,16 @@ def check_root_full():
 
 
 def main():
-    """Main function from which to call all functions"""
-    if check_reboot():
-        print("Pending Reboot.")
-        sys.exit(1)
-    if check_root_full():
-        print("Root partition full.")
-        sys.exit(1)
+    """Main function from which all function calls are made."""
+    checks = [
+        (check_reboot, "Pending Reboot"),
+        (check_root_full, "Root partition full"),
+    ]
+
+    for check, msg in checks:
+        if check():
+            print(msg)
+            sys.exit(1)
 
     print("Everything ok.")
     sys.exit(0)
